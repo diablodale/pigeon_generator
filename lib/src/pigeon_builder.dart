@@ -33,7 +33,10 @@ class PigeonBuilder extends Builder {
     // For each file, get the Pigeon options and their outputs.
     for (final entity in inputsDirectory.listSync()) {
       if (entity is File && entity.path.endsWith('.dart')) {
-        final input = entity.path;
+        // listSync() yields OS-native paths (backslashes on Windows), but
+        // build_runner matches buildExtensions keys against posix-style asset
+        // IDs. Normalize so the builder is applied on every platform.
+        final input = p.posix.joinAll(_pathContext.split(entity.path));
         final pigeonOptions = config.getPigeonOptions(input);
         result[input] = pigeonOptions.getOutputs();
       }
