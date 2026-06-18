@@ -48,6 +48,19 @@ class PigeonBuilder extends Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     final inputId = buildStep.inputId;
+
+    // build_runner applies this builder to every `.dart` asset matched by
+    // buildExtensions, which can include copies of the schema surfaced via
+    // symlinks (e.g. an example app's `.plugin_symlinks`). Only process
+    // files that live directly in the configured inputs folder; anything
+    // else is not a schema this builder owns.
+    final inputsDir = p.posix.normalize(
+      p.posix.joinAll(_pathContext.split(config.inputs)),
+    );
+    if (p.posix.normalize(p.posix.dirname(inputId.path)) != inputsDir) {
+      return;
+    }
+
     final allowedOutputs = buildStep.allowedOutputs;
 
     if (await buildStep.canRead(inputId)) {

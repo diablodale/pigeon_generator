@@ -82,12 +82,10 @@ class PigeonScratchSpace extends ScratchSpace {
 
     String? getPath(String? output) {
       if (output == null) return null;
-
-      final assetId = allowedOutputs.firstWhere(
-        (allowedOutput) => allowedOutput.path == output,
-      );
-
-      return fileFor(assetId).path;
+      for (final allowedOutput in allowedOutputs) {
+        if (allowedOutput.path == output) return fileFor(allowedOutput).path;
+      }
+      return null;
     }
 
     final newPigeonOptions = PigeonOptions(

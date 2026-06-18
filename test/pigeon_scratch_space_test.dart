@@ -84,5 +84,22 @@ void main() {
       expect(updatedOptions.objcSourceOut, p.join(libPath, 'objc_source.m'));
       expect(updatedOptions.astOut, p.join(libPath, 'ast_out.ast'));
     });
+
+    test(
+      'getPigeonOptions does not throw when no outputs match allowedOutputs',
+      () {
+        final pigeonOptions = PigeonOptions(
+          dartOut: 'lib/dart_out.dart',
+          kotlinOut: 'android/kotlin_out.kt',
+        );
+
+        // Empty allowedOutputs — previously caused firstWhere to throw
+        // StateError when the builder was invoked on a symlinked schema.
+        expect(
+          () => scratchSpace.getPigeonOptions(pigeonOptions, const []),
+          returnsNormally,
+        );
+      },
+    );
   });
 }
