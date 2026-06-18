@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:path/path.dart' show join;
+import 'package:path/path.dart' as p;
 import 'package:pigeon/pigeon.dart';
 
 import 'output_config.dart';
@@ -54,7 +54,7 @@ class SwiftConfig {
 
     final config = map is Map ? map : <String, dynamic>{};
     final parts = outFolder?.split('/').map((part) => part.capitalize());
-    final defaultPath = join('ios/Runner', parts?.join('/'));
+    final defaultPath = p.posix.join('ios/Runner', parts?.join('/'));
 
     return SwiftConfig._internal(
       out: OutputConfig.fromOptions(
