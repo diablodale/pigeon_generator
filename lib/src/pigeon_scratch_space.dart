@@ -82,10 +82,35 @@ class PigeonScratchSpace extends ScratchSpace {
 
     String? getPath(String? output) {
       if (output == null) return null;
+
+      // Some inputs (e.g. schema copies surfaced through symlinks) are not
+      // owned by this build step; their outputs won't be in allowedOutputs.
+      // Skip rather than throw.
+      AssetId? assetId;
       for (final allowedOutput in allowedOutputs) {
-        if (allowedOutput.path == output) return fileFor(allowedOutput).path;
+        if (allowedOutput.path == output) {
+          assetId = allowedOutput;
+          break;
+        }
       }
-      return null;
+      if (assetId == null) return null;
+
+      // Pigeon derives identifiers and #includes from these output paths using
+      // a posix path context in several generators (Kotlin, Java, ObjC, Swift,
+      // GObject). Hand them forward-slash paths even on Windows so the basename
+      // is parsed correctly. dart:io still writes to this path, and copy-back
+      // via fileFor() resolves to the same file.
+      final nativePath = fileFor(assetId).path;
+
+      // On Windows, '\' is the OS path separator and is prohibited in file and
+      // directory names by the Win32 API, so every '\' in nativePath is a
+      // separator — replacing them all with '/' is lossless and gives a path
+      // dart:io can still write to (it accepts '/' on Windows).
+      if (Platform.isWindows) {
+        return nativePath.replaceAll('\\', '/');
+      } else {
+        return nativePath;
+      }
     }
 
     final newPigeonOptions = PigeonOptions(
