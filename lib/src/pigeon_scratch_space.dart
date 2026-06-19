@@ -38,9 +38,8 @@ final scratchSpaceResource = Resource<PigeonScratchSpace>(
 class PigeonScratchSpace extends ScratchSpace {
   @override
   File fileFor(AssetId id) {
-    final packagePath = p.url.join('package', id.package, id.path);
-
-    return File(p.join(tempDir.path, p.normalize(packagePath)));
+    final packagePath = p.join(tempDir.path, 'package', p.normalize(id.package), p.normalize(id.path));
+    return File(packagePath);
   }
 
   /// Creates a new [PigeonOptions] object with the output paths updated to use
@@ -48,7 +47,7 @@ class PigeonScratchSpace extends ScratchSpace {
   ///
   /// Parameters:
   /// - [pigeonOptions]: The original [PigeonOptions] configuration object
-  ///   containing the desired output settings
+  ///   containing the desired output settings)
   /// - [allowedOutputs]: An iterable of [AssetId] objects representing the
   ///   files that are permitted to be generated. Only paths matching these
   ///   assets will be updated to use scratch space locations

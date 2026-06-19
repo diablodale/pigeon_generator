@@ -1,3 +1,15 @@
+# NOTE FOR CONSUMERS: If your package is a Flutter plugin with an example/ app,
+# add the following to your own build.yaml to prevent build_runner from following
+# the ephemeral .plugin_symlinks back to your package root. Without it,
+# build_runner tracks generated files under the symlink path as separate assets
+# causing a race condition that leads to sporadic deletions and sharing violations.
+#
+#   targets:
+#     $default:
+#       sources:
+#         exclude:
+#           - example/**
+
 builders:
   pigeon_generator:
     import: "package:pigeon_generator/pigeon_generator.dart"
