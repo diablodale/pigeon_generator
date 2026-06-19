@@ -27,6 +27,7 @@ class PigeonConfig {
     required this.gobject,
     required this.ast,
     this.copyrightHeader,
+    this.ignoreLints = true,
     this.debugGenerators,
     this.basePath,
     this.skipOutputs,
@@ -63,6 +64,9 @@ class PigeonConfig {
 
   /// Path to a copyright header that will get prepended to generated code.
   final String? copyrightHeader;
+
+  /// Whether to ignore lint violations in generated Dart code.
+  final bool ignoreLints;
 
   /// True means print out line number of generators in comments at newlines.
   final bool? debugGenerators;
@@ -104,6 +108,7 @@ class PigeonConfig {
       gobject: GObjectConfig.fromMap(map['gobject'], outFolder),
       ast: AstConfig.fromMap(map['ast'], outFolder),
       copyrightHeader: copyrightHeader,
+      ignoreLints: map['ignore_lints'] as bool? ?? true,
       debugGenerators: map['debug_generators'] as bool?,
       basePath: map['base_path'] as String?,
       skipOutputs: map['skip_outputs'], // YamlMap
@@ -158,6 +163,8 @@ class PigeonConfig {
       astOut: getOutputPath(ast.out),
       debugGenerators: debugGenerators,
       basePath: basePath,
+      copyrightHeader: copyrightHeader,
+      ignoreLints: ignoreLints,
     );
 
     if (skipOutputs?.containsKey(fileName) == true) {

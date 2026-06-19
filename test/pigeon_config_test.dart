@@ -81,6 +81,106 @@ void main() {
         expect(options.dartOut, equals('lib/api_file.g.dart'));
         expect(options.swiftOut, equals('ios/Runner/ApiFile.g.swift'));
       });
+
+      test('should forward explicit copyright_header to PigeonOptions',
+          () async {
+        const pigeonInput = '''
+          import 'package:pigeon/pigeon.dart';
+          @HostApi()
+          abstract class Api {
+            void ping();
+          }
+        ''';
+        await Directory('pigeons').create(recursive: true);
+        await File('pigeons/api.dart').writeAsString(pigeonInput);
+        await File('pigeons/copyright.txt')
+            .writeAsString('Copyright 2024 Example Corp');
+
+        final config = PigeonConfig.fromMap({
+          'copyright_header': 'pigeons/copyright.txt',
+        });
+        final options = config.getPigeonOptions('pigeons/api.dart');
+
+        expect(options.copyrightHeader, equals('pigeons/copyright.txt'));
+      });
+
+      test('should forward auto-discovered copyright.txt to PigeonOptions',
+          () async {
+        const pigeonInput = '''
+          import 'package:pigeon/pigeon.dart';
+          @HostApi()
+          abstract class Api {
+            void ping();
+          }
+        ''';
+        await Directory('pigeons').create(recursive: true);
+        await File('pigeons/api.dart').writeAsString(pigeonInput);
+        await File('pigeons/copyright.txt')
+            .writeAsString('Copyright 2024 Example Corp');
+
+        final config = PigeonConfig.fromMap({});
+        expect(config.copyrightHeader, equals('pigeons/copyright.txt'));
+
+        final options = config.getPigeonOptions('pigeons/api.dart');
+        expect(options.copyrightHeader, equals('pigeons/copyright.txt'));
+      });
+
+      test('should forward ignore_lints false to PigeonOptions', () async {
+        const pigeonInput = '''
+          import 'package:pigeon/pigeon.dart';
+          @HostApi()
+          abstract class Api {
+            void ping();
+          }
+        ''';
+        await Directory('pigeons').create(recursive: true);
+        await File('pigeons/api.dart').writeAsString(pigeonInput);
+
+        final config = PigeonConfig.fromMap({'ignore_lints': false});
+        expect(config.ignoreLints, isFalse);
+
+        final options = config.getPigeonOptions('pigeons/api.dart');
+        expect(options.ignoreLints, isFalse);
+      });
+
+      test('should default ignoreLints to true when not configured', () async {
+        const pigeonInput = '''
+          import 'package:pigeon/pigeon.dart';
+          @HostApi()
+          abstract class Api {
+            void ping();
+          }
+        ''';
+        await Directory('pigeons').create(recursive: true);
+        await File('pigeons/api.dart').writeAsString(pigeonInput);
+
+        final config = PigeonConfig.fromMap({});
+        expect(config.ignoreLints, isTrue);
+
+        final options = config.getPigeonOptions('pigeons/api.dart');
+        expect(options.ignoreLints, isTrue);
+      });
+
+      test('should leave copyrightHeader null when not configured', () async {
+        const pigeonInput = '''
+          import 'package:pigeon/pigeon.dart';
+          @HostApi()
+          abstract class Api {
+            void ping();
+          }
+        ''';
+        await Directory('pigeons').create(recursive: true);
+        await File('pigeons/api_noheader.dart').writeAsString(pigeonInput);
+        // Ensure no copyright.txt exists for this test case.
+        final copyrightFile = File('pigeons/copyright.txt');
+        if (copyrightFile.existsSync()) await copyrightFile.delete();
+
+        final config = PigeonConfig.fromMap({});
+        expect(config.copyrightHeader, isNull);
+
+        final options = config.getPigeonOptions('pigeons/api_noheader.dart');
+        expect(options.copyrightHeader, isNull);
+      });
     });
   });
 }
